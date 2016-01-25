@@ -39,7 +39,7 @@ module.exports = function (ctx, cb) {
   let message = ctx.data.name ? ctx.data.name : 'Timer Stop';
 
   if (!time) {
-    cb(null, 'Error');
+    cb(null, 'Error: missing or invalid time');
     return false;
   }
   let hours = time[0];
@@ -51,7 +51,12 @@ module.exports = function (ctx, cb) {
   let hour_to = dateformat(new Date(from.getTime() + min2mil(1)), 'HH:MM');
   let date = dateformat(from, 'mm/dd/yyyy');
   let quick = `${message} from ${hour_from} to ${hour_to} on ${date}`;
-  request.post(URL + ctx.data.KEY).form({'value1': quick});
-
-  cb(null, 'Ok');
+  request
+    .post(URL + ctx.data.KEY)
+    .form({'value1': quick})
+    .on('response', () => { cb(null, 'Ok'); })
+    .on('error', (err) => {
+      console.log(err);
+      cb(null, 'Error trying to post to IFTTT');
+    });
 }
